@@ -94,7 +94,8 @@ def main():
     np.save("results/alignment.npy", mat)
     print("Saved alignment matrix in results/alignment.npy")
 
-    plt.imshow(mat, interpolation="nearest")
+    plt.imshow(mat, interpolation="nearest", cmap="gray")
+    plt.colorbar()
     plt.savefig("plots/alignment.png")
     print("Saved alignment matrix plot in plots/alignment.png")
 

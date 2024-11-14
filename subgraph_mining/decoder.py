@@ -44,6 +44,11 @@ import pickle
 import torch.multiprocessing as mp
 from sklearn.decomposition import PCA
 
+def create_simple_dataset():
+    graph = nx.Graph()
+    graph.add_edges_from([(0, 1), (0, 2), (1, 2), (2, 3), (2, 4), (2, 5)])
+    return [graph]
+
 def make_plant_dataset(size):
     generator = combined_syn.get_generator([size])
     random.seed(3001)
@@ -248,6 +253,9 @@ def main():
     elif args.dataset.startswith('plant-'):
         size = int(args.dataset.split("-")[-1])
         dataset = make_plant_dataset(size)
+        task = 'graph'
+    elif args.dataset == "simple":
+        dataset = create_simple_dataset()
         task = 'graph'
 
     pattern_growth(dataset, task, args) 
