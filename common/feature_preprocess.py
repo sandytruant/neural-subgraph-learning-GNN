@@ -18,7 +18,7 @@ import queue
 from deepsnap.dataset import GraphDataset
 from deepsnap.batch import Batch
 from deepsnap.graph import Graph as DSGraph
-#import orca
+import orca
 from torch_scatter import scatter_add
 
 from common import utils
@@ -141,7 +141,7 @@ class FeatureAugment(nn.Module):
             "motif_counts": motif_counts_fun,
             "identity": identity_fun}
 
-    def register_feature_fun(name, feature_fun):
+    def register_feature_fun(self, name, feature_fun):
         self.node_feature_funs[name] = feature_fun
 
     @staticmethod
@@ -208,7 +208,7 @@ class Preprocess(nn.Module):
             return self.dim_in + sum(
                     [aug_dim for aug_dim in FEATURE_AUGMENT_DIMS])
         elif AUGMENT_METHOD == 'add':
-            return dim_in
+            return self.dim_in
         else:
             raise ValueError('Unknown feature augmentation method {}.'.format(
                     AUGMENT_METHOD))

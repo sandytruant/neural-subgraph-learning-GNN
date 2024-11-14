@@ -392,14 +392,14 @@ class GreedySearchAgent(SearchAgent):
 
             if cur_rank_method == "margin":
                 wl_hashes = set()
-                cands = cand_patterns[pattern_size]
+                cands = self.cand_patterns[pattern_size]
                 cand_patterns_uniq_size = []
                 for pattern in sorted(cands, key=lambda x: x[0]):
-                    wl_hash = utils.wl_hash(pattern[1], node_anchored=node_anchored)
+                    wl_hash = utils.wl_hash(pattern[1], node_anchored=True)
                     if wl_hash not in wl_hashes:
                         wl_hashes.add(wl_hash)
                         cand_patterns_uniq_size.append(pattern[1])
-                        if len(cand_patterns_uniq_size) >= out_batch_size:
+                        if len(cand_patterns_uniq_size) >= self.out_batch_size:
                             cand_patterns_uniq += cand_patterns_uniq_size
                             break
             elif cur_rank_method == "counts":

@@ -13,6 +13,7 @@ import torch.multiprocessing as mp
 import torch.nn.functional as F
 import torch.optim as optim
 from torch_geometric.data import DataLoader
+from torch.utils.data.distributed import DistributedSampler
 from torch.utils.data import DataLoader as TorchDataLoader
 from torch_geometric.datasets import TUDataset, PPI, QM9
 import torch_geometric.utils as pyg_utils
@@ -89,22 +90,22 @@ class OTFSynDataSource(DataSource):
         self.node_anchored = node_anchored
         self.generator = combined_syn.get_generator(np.arange(
             self.min_size + 1, self.max_size + 1))
-
+    
     def gen_data_loaders(self, size, batch_size, train=True,
-        use_distributed_sampling=False):
-        loaders = []
-        for i in range(2):
-            dataset = combined_syn.get_dataset("graph", size // 2,
-                np.arange(self.min_size + 1, self.max_size + 1))
-            sampler = torch.utils.data.distributed.DistributedSampler(
-                dataset, num_replicas=hvd.size(), rank=hvd.rank()) if \
-                    use_distributed_sampling else None
-            loaders.append(TorchDataLoader(dataset,
-                collate_fn=Batch.collate([]), batch_size=batch_size // 2 if i
-                == 0 else batch_size // 2,
-                sampler=sampler, shuffle=False))
-        loaders.append([None]*(size // batch_size))
-        return loaders
+            use_distributed_sampling=False):
+            loaders = []
+            for i in range(2):
+                dataset = combined_syn.get_dataset("graph", size // 2,
+                    np.arange(self.min_size + 1, self.max_size + 1))
+                sampler = DistributedSampler(
+                    dataset, num_replicas=torch.distributed.get_world_size(), rank=torch.distributed.get_rank()) if \
+                        use_distributed_sampling else None
+                loaders.append(TorchDataLoader(dataset,
+                    collate_fn=Batch.collate([]), batch_size=batch_size // 2 if i
+                    == 0 else batch_size // 2,
+                    sampler=sampler, shuffle=False))
+            loaders.append([None]*(size // batch_size))
+            return loaders
 
     def gen_batch(self, batch_target, batch_neg_target, batch_neg_query,
         train):
